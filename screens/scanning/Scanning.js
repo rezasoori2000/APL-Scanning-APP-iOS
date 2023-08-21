@@ -331,7 +331,7 @@ const Scanning = (props) => {
           style={{
             ...styles.barCodeBox,
             width: "90%",
-            height: "60%",
+            height: isTyping ? "30%" : "60%",
           }}
         >
           <BarCodeScanner
