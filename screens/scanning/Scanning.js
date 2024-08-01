@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ApiGet from "../../api/ApiGet";
 import DetailsModal from "../../components/DetailsModal";
 import { getUser } from "../../helper/db";
-
+import ApiGetNew from "../../api/ApiGetNew";
 const Scanning = (props) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [text, setText] = useState("");
@@ -129,7 +129,7 @@ const Scanning = (props) => {
 
     return message === "false";
   };
-  const callReceivedApi = async (barcode, name) => {
+  const callReceivedApi1 = async (barcode, name) => {
     try {
       var result = await ApiGet("ESP_HS_ReceiveDelivery", `${barcode},${name}`);
       var message = await JSON.stringify(result);
@@ -141,6 +141,29 @@ const Scanning = (props) => {
       return true;
     } catch (ex) {
       setToastMessage(`Failed to submit data:  ${ex.message}`);
+      return false;
+    }
+  };
+  const callReceivedApi = async (barcode, name) => {
+    try {
+      var result = await ApiGetNew("ESP_HS_ReceiveDelivery", `${barcode},${name}`);
+      var message = JSON.parse(result); // Parse the JSON string
+  
+      if (!message.success) {
+        
+        if(result.toLowerCase().includes('true')){
+          return true;
+        }
+        setToastMessage(`Failed to submit data: ${JSON.stringify(message)}`);
+        return false;
+      }
+  
+      return true;
+    } catch (ex) {
+      if (ex.message.toLowerCase().includes('true')) {
+        return true;
+      }
+      setToastMessage(`Failed to submit data: ${ex.message}`);
       return false;
     }
   };
@@ -343,15 +366,17 @@ const Scanning = (props) => {
             width={isTyping ? "30%" : "99%"}
             height={isTyping ? "30%" : "90%"}
           />
-          <TouchableOpacity
-            disabled={scanNow}
-            //  style={{width:200,height:40}}
-            color={!scanNow ? Colors.accentColor : Colors.primary}
-            onPress={() => {
-              setScanNow(true);
-            }}
-            //style={[styles.submit, styles.againStyle]}
-          >
+            <TouchableOpacity
+              color={Colors.accentColor}
+              onPress={() => {
+                setScanned(false);
+                setScanNow(false);
+                setText(null);
+                setDetails([]);
+                setDetailsContainerVisible(false);
+              }}
+              style={[styles.submit, styles.againStyle]}
+            >
             <View
               style={{
                 width: 260,
@@ -427,7 +452,7 @@ const Scanning = (props) => {
           style={{
             flex: 1,
             paddingTop: 5,
-            marginBottom: -20,
+            marginBottom: -40,
             flexDirection: "row",
           }}
         >
