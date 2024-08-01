@@ -1,7 +1,9 @@
 {
   "expo": {
-    "name": "APL orders Scanning",
+    "name": "apl-orders-scanning",
     "slug": "apl-orders-scanning",
+    "compileSdkVersion": 34,
+    "targetSdkVersion": 34,
     "version": "50.0.13",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,13 +20,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.apl.orders.scanning",
+      "bundleIdentifier": "com.apl.scanning.app",
       "infoPlist": {
         "NSCameraUsageDescription": "We need access to your camera to scan orders. Otherwise, you need to enter the barcode manually."
-      }
+      },
+      "buildNumber":"24"
     },
     "android": {
       "package": "com.apl.orders.scanning",
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
       "versionCode": 24,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

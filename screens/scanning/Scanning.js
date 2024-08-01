@@ -53,26 +53,27 @@ const Scanning = (props) => {
 
         if (prefix === "eah" || prefix === "agp") {
           barcode = barcode.replace(/\D/g, "");
-          console.log("barcode:", barcode);
-          console.log("var isNotRecevied = await callIsNotReceived(barcode);");
+          // console.log("barcode:", barcode);
+          // console.log("var isNotRecevied = await callIsNotReceived(barcode);");
 
           var isNotRecevied = await callIsNotReceived(barcode);
-          console.log("Is not Received: ", isNotRecevied);
+          // console.log("Is not Received: ", isNotRecevied);
           if (isNotRecevied) {
             var result = JSON.parse(
               await ApiGet("ESP_HS_GetDespatchInfo", barcode)
             );
-            console.log("----------Log-------------");
+            // console.log("----------Log-------------");
 
-            console.log(result);
-            console.log("----------Log-------------");
+            // console.log(result);
+            // console.log("----------Log-------------");
             setDetails(result);
             setDetailsContainerVisible(true);
           } else {
             alert("The order is already received");
           }
         } else {
-          console.log("the barcode is" + barcode);
+          // console.log("the barcode is"+barcode);
+          // console.log("the barcode is"+barcode);
           alert("The barcode is NOT exist within the system!");
           setText("");
         }
@@ -89,6 +90,9 @@ const Scanning = (props) => {
 
     var barcode = text.replace(/\D/g, "");
     var result = await callReceivedApi(barcode, `${company}-${user}`);
+    console.warn('Result: '+result);
+    console.error('Json Result: '+JSON.stringify(result));
+
 
     if (result) {
       setToastMessage(`The order barcode successfully received`);
@@ -125,7 +129,7 @@ const Scanning = (props) => {
     var isReceived = JSON.parse(await ApiGet(methodname, barcode));
     var message = await JSON.stringify(isReceived);
     var objMsg = JSON.parse(message);
-    console.log("msg is Received:" + message);
+    // console.log("msg is Received:" + message);
 
     return message === "false";
   };
@@ -133,11 +137,12 @@ const Scanning = (props) => {
     try {
       var result = await ApiGet("ESP_HS_ReceiveDelivery", `${barcode},${name}`);
       var message = await JSON.stringify(result);
-      if (message != "true") {
+      if (message!='true')
+      {
         setToastMessage(`Failed to submit data:  ${message}`);
         return false;
       }
-      console.log(`Result: ${message}`);
+      // console.log(`Result: ${message}`);
       return true;
     } catch (ex) {
       setToastMessage(`Failed to submit data:  ${ex.message}`);
@@ -169,15 +174,11 @@ const Scanning = (props) => {
   };
   const isFocused = useIsFocused();
   useEffect(() => {
-    const getData = async () => {
-      const dbUser = await getUser();
-      if (dbUser.rows._array.length > 0) {
-        setUser(dbUser.rows._array[0].user);
-        setCompany(dbUser.rows._array[0].company);
-        console.log(
-          dbUser.rows._array[0].company + " " + dbUser.rows._array[0].user
-        );
-      }
+   const getData = async () => {
+     const dbUser = await getUser();
+        setUser(dbUser.user);
+        setCompany(dbUser.company);
+      
     };
     getData();
     askForPermission();
