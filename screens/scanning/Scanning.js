@@ -365,7 +365,7 @@ const Scanning = (props) => {
             style={{ marginLeft: 0, paddingLeft: 0 }}
             BarCodeBounds="square"
             width={isTyping ? "30%" : "99%"}
-            height={isTyping ? "30%" : "90%"}
+            height={isTyping ? "30%" : "80%"}
           />
             <TouchableOpacity
               color={Colors.accentColor}
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
   },
   scanContainer: {
     flexDirection: "column",
-    height: 90,
+    height: 100,
     justifyContent: "center",
     alignItems: "center",
     width: "99%",
