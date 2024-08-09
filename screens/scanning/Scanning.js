@@ -4,6 +4,7 @@ import {
   TextInput,
   View,
   Text,
+  Label,
   Image,
   TouchableOpacity,
 } from "react-native";
@@ -19,6 +20,7 @@ import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 const Scanning = (props) => {
   //const [hasPermission, setHasPermission] = useState(null);
   const [text, setText] = useState("");
+  const [text2, setText2] = useState({});
   const [scanned, setScanned] = useState(false);
   const [scanNow, setScanNow] = useState(false);
 
@@ -379,6 +381,7 @@ const Scanning = (props) => {
         >
           <CameraView
              onBarcodeScanned={(data, type) => {
+              setText2(data);
               console.log(data.data);
               setTimeout(() => {
                 let prefix = data.data.substring(0, 3).toLowerCase();
@@ -435,6 +438,13 @@ const Scanning = (props) => {
               }}
               value={text}
             />
+                        <Text
+              
+              
+              
+            >
+              {JSON.stringify(text2)}
+            </Text>
           </View>
           <View style={{ justifyContent: "flex-start", width: "25%" }}>
             <TouchableOpacity

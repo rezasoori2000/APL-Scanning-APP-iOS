@@ -8,16 +8,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-// import { BarCodeScanner } from "expo-barcode-scanner";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import Colors from "../../constants/Colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ApiGet from "../../api/ApiGet";
 import DetailsModal from "../../components/DetailsModal";
 import { getUser } from "../../helper/db";
 import ApiGetNew from "../../api/ApiGetNew";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 const Scanning = (props) => {
-  //const [hasPermission, setHasPermission] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
   const [text, setText] = useState("");
   const [scanned, setScanned] = useState(false);
   const [scanNow, setScanNow] = useState(false);
@@ -31,8 +30,12 @@ const Scanning = (props) => {
   const [toastType, setToastType] = useState("#19c22d");
   const [toastHeader, setToastHeader] = useState("");
   const [toastMessage, setToastMessage] = useState("");
-
-  const [permission, requestPermission] = useCameraPermissions();
+  const askForPermission = () => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  };
   const [isTyping, setIsTyping] = useState(false);
   const getDetailsApi = async () => {
     try {
@@ -87,8 +90,9 @@ const Scanning = (props) => {
 
     var barcode = text.replace(/\D/g, "");
     var result = await callReceivedApi(barcode, `${company}-${user}`);
-    console.warn("Result: " + result);
-    console.error("Json Result: " + JSON.stringify(result));
+    console.warn('Result: '+result);
+    console.error('Json Result: '+JSON.stringify(result));
+
 
     if (result) {
       setToastMessage(`The order barcode successfully received`);
@@ -133,7 +137,8 @@ const Scanning = (props) => {
     try {
       var result = await ApiGet("ESP_HS_ReceiveDelivery", `${barcode},${name}`);
       var message = await JSON.stringify(result);
-      if (message != "true") {
+      if (message!='true')
+      {
         setToastMessage(`Failed to submit data:  ${message}`);
         return false;
       }
@@ -146,23 +151,21 @@ const Scanning = (props) => {
   };
   const callReceivedApi = async (barcode, name) => {
     try {
-      var result = await ApiGetNew(
-        "ESP_HS_ReceiveDelivery",
-        `${barcode},${name}`
-      );
+      var result = await ApiGetNew("ESP_HS_ReceiveDelivery", `${barcode},${name}`);
       var message = JSON.parse(result); // Parse the JSON string
-
+  
       if (!message.success) {
-        if (result.toLowerCase().includes("true")) {
+        
+        if(result.toLowerCase().includes('true')){
           return true;
         }
         setToastMessage(`Failed to submit data: ${JSON.stringify(message)}`);
         return false;
       }
-
+  
       return true;
     } catch (ex) {
-      if (ex.message.toLowerCase().includes("true")) {
+      if (ex.message.toLowerCase().includes('true')) {
         return true;
       }
       setToastMessage(`Failed to submit data: ${ex.message}`);
@@ -171,12 +174,14 @@ const Scanning = (props) => {
   };
   const isFocused = useIsFocused();
   useEffect(() => {
-    const getData = async () => {
-      const dbUser = await getUser();
-      setUser(dbUser.user);
-      setCompany(dbUser.company);
+   const getData = async () => {
+     const dbUser = await getUser();
+        setUser(dbUser.user);
+        setCompany(dbUser.company);
+      
     };
     getData();
+    askForPermission();
     props.navigation.setOptions({
       headerShown: false,
     });
@@ -184,10 +189,9 @@ const Scanning = (props) => {
       getDetailsApi();
     }
   }, [isFocused, scanned]);
-  const handleBarCodeScanned = ({ data }) => {
-    console.log("handleBarCodeScanned", data.data);
+  const handleBarCodeScanned = ({ type, data }) => {
     setIsLoading(true);
-    setText(data.data);
+    setText(data);
     setScanned(true);
     setScanNow(false);
   };
@@ -234,38 +238,13 @@ const Scanning = (props) => {
       </View>
     );
   }
-  if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
+  if (hasPermission === null)
     return (
       <View style={styles.center}>
-        <Text style={styles.message}>
-          We need your permission to show the camera
-        </Text>
-        <TouchableOpacity onPress={requestPermission} title="grant permission">
-          <View
-            style={{
-              width: 260,
-              height: 30,
-              backgroundColor: Colors.accentColor,
-              alignContent: "center",
-              alignItems: "center",
-              marginTop: 5,
-              paddingTop: 5,
-              borderRadius: 10,
-              elevation: 5,
-            }}
-          >
-            <Text>grant permission</Text>
-          </View>
-        </TouchableOpacity>
+        <Text>Request for camera permission</Text>
       </View>
     );
-  }
-  if (!permission.granted)
+  if (hasPermission === false)
     return (
       <View style={styles.top}>
         <View style={styles.scanContainer}>
@@ -277,6 +256,7 @@ const Scanning = (props) => {
               flexDirection: "row",
             }}
           >
+            {/* <Text>User:</Text> */}
             <MaterialCommunityIcons
               name="account"
               size={24}
@@ -324,7 +304,6 @@ const Scanning = (props) => {
                 onPress={() => {
                   setScanned(false);
                   setScanNow(false);
-                  setIsTyping(false);
                   setText(null);
                   setDetailsContainerVisible(false);
                 }}
@@ -350,7 +329,7 @@ const Scanning = (props) => {
           {isLoading && (
             <Image
               source={require("../../assets/loading.gif")}
-              style={{ width: 350, height: 350 }}
+              style={{ width: 300, height: 300 }}
             />
           )}
           {
@@ -363,6 +342,8 @@ const Scanning = (props) => {
                 key={1}
               ></DetailsModal>
             )
+
+            // <Grid listData={detail} callReceived={callReceived} detailsModalVisible={detailsModalVisible}/>
           }
         </View>
       </View>
@@ -377,33 +358,43 @@ const Scanning = (props) => {
             height: isTyping ? "30%" : "60%",
           }}
         >
-          <CameraView
-             onBarcodeScanned={(data, type) => {
-              console.log(data.data);
-              setTimeout(() => {
-                let prefix = data.data.substring(0, 3).toLowerCase();
-                if (prefix === "eah" || prefix === "agp") {
-                setText(data.data);
-                }
-                if (scanNow) {
-                  handleBarCodeScanned(data);
-                }
-              }, 500); 
+          <BarCodeScanner
+            onBarCodeScanned={(type, data) => {
+              scanNow ? handleBarCodeScanned(type, data) : undefined;
             }}
-            barcodeScannerSettings={{}}
             style={{ marginLeft: 0, paddingLeft: 0 }}
             BarCodeBounds="square"
             width={isTyping ? "30%" : "99%"}
             height={isTyping ? "30%" : "80%"}
-          >  
-           <View style={{flex: 1,flexDirection: 'row',backgroundColor: 'transparent'}}>
-          <TouchableOpacity style={{    flex: 1,alignSelf: 'flex-end',alignItems: 'center',backgroundColor:Colors.accentColor,borderRadius: 30,margin:10}}   onPress={() => {console.log("Scan it");setScanned(true);setScanNow(true);setDetails([]);setDetailsContainerVisible(false);}}>
-            <Text style={styles.mainText}>Scan it</Text>
+          />
+            <TouchableOpacity
+              color={Colors.accentColor}
+              onPress={() => {
+                setScanned(false);
+                setScanNow(false);
+                setText(null);
+                setDetails([]);
+                setDetailsContainerVisible(false);
+              }}
+              style={[styles.submit, styles.againStyle]}
+            >
+            <View
+              style={{
+                width: 260,
+                height: 30,
+                backgroundColor: Colors.accentColor,
+                alignContent: "center",
+                alignItems: "center",
+                marginTop: 5,
+                paddingTop: 5,
+                borderRadius: 10,
+                elevation: 5,
+              }}
+            >
+              <Text>Scan it</Text>
+            </View>
           </TouchableOpacity>
         </View>
-      </CameraView>
-        </View>
-        
       )}
       <View style={styles.scanContainer}>
         <View
@@ -444,7 +435,6 @@ const Scanning = (props) => {
                 setScanNow(false);
                 setText(null);
                 setDetails([]);
-                setIsTyping(false);
                 setDetailsContainerVisible(false);
               }}
               style={[styles.submit, styles.againStyle]}

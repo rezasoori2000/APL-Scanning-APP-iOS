@@ -8,18 +8,27 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "default"
+      },
+      "env": {
+        "DEVELOPMENT": "true"
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "default"
       }
     },
     "production": {
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "default"
+      },
+      "android": {
+      
+      },
+      "env": {
+        "DEVELOPMENT": "false"
       }
     }
   },
@@ -33,6 +42,7 @@
         "ascAppId": "6451384771",
         "appleTeamId": "R26YGTLFFN"
       }
+
     }
   }
 }
