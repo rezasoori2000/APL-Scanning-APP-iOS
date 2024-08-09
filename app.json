@@ -4,7 +4,7 @@
     "slug": "apl-orders-scanning",
     "compileSdkVersion": 34,
     "targetSdkVersion": 34,
-    "version": "50.0.14",
+    "version": "50.0.15",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -24,7 +24,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "We need access to your camera to scan orders. Otherwise, you need to enter the barcode manually."
       },
-      "buildNumber":"25"
+      "buildNumber":"26"
     },
     "android": {
       "package": "com.apl.orders.scanning",
@@ -46,6 +46,14 @@
       "eas": {
         "projectId": "70120b00-7208-4984-9350-169dcf4ca46e"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow apl-orders-scanning to access your camera"
+        }
+      ]
+    ]
   }
 }
